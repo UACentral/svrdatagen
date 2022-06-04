@@ -22,3 +22,15 @@ cmake -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo -DUA_NAMESPACE_ZE
 make
 sudo make install
 ```
+## Initial setup
+Clone git repo
+```
+cd ~/prj
+git clone https://github.com/UACentral/svrdatagen.git
+```
+Soft link open62541 .c/.h
+```
+cd ~/prj/svrdatagen
+ln -s ~/prj/open62541/build/open62541.c ./open62541.c
+ln -s ~/prj/open62541/build/open62541.h ./open62541.h
+```
