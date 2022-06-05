@@ -71,13 +71,20 @@ static void stopHandler(int sign) {
     running = false;
 }
 
-int main(void) {
+int main(int argc, char** argv) {
     signal(SIGINT, stopHandler);
     signal(SIGTERM, stopHandler);
 
     UA_Server *server = UA_Server_new();
-    UA_ServerConfig_setDefault(UA_Server_getConfig(server));
+	if( argc > 1) {
+        int port = 4880;
+		port = atoi(argv[1]);
+        UA_ServerConfig_setMinimal(UA_Server_getConfig(server), port, NULL);
+	} else {
+        UA_ServerConfig_setDefault(UA_Server_getConfig(server));
+    }
 
+    
     addCurrentTimeDataSourceVariable(server);
 
     UA_StatusCode retval = UA_Server_run(server, &running);
