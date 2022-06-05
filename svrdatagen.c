@@ -1,6 +1,7 @@
 #include "open62541.h"
 #include <signal.h>
 #include <stdlib.h>
+#include <pthread.h>
 
 UA_UInt32 uiCurrentValue = 0; 
 static UA_StatusCode
@@ -12,16 +13,16 @@ readCurrentValue(UA_Server *server,
     UA_Variant_setScalarCopy(&dataValue->value, &uiCurrentValue,
                              &UA_TYPES[UA_TYPES_UINT32]);
 
-    UA_String out = UA_STRING_NULL;
-    UA_String_copy(&nodeId->identifier.string, &out);
-    // printf("%.*s\n", (int)out.length, out.data);
-    int result;
-    result = strcmp(out.data, "uint32.1");
-    // printf("%d", result);
-    if (0 == result ) {
-        uiCurrentValue++;
-    }
-    UA_String_clear(&out);
+    // UA_String out = UA_STRING_NULL;
+    // UA_String_copy(&nodeId->identifier.string, &out);
+    // // printf("%.*s\n", (int)out.length, out.data);
+    // int result;
+    // result = strcmp(out.data, "uint32.1");
+    // // printf("%d", result);
+    // if (0 == result ) {
+    //     uiCurrentValue++;
+    // }
+    // UA_String_clear(&out);
     dataValue->hasValue = true;
     return UA_STATUSCODE_GOOD;
 }
@@ -71,7 +72,23 @@ static void stopHandler(int sign) {
     running = false;
 }
 
+void *updateCurrentValue(void *arg) 
+{
+    while(1) {
+        uiCurrentValue++;
+        if (false == running) {
+            break;
+        }
+
+        UA_sleep_ms(1000);
+    }
+    printf("Exiting updateCurrentValue\n");
+}
+
 int main(int argc, char** argv) {
+    pthread_t threadUpdate;
+    int iret = pthread_create( &threadUpdate, NULL, updateCurrentValue, NULL );
+
     signal(SIGINT, stopHandler);
     signal(SIGTERM, stopHandler);
 
@@ -89,5 +106,7 @@ int main(int argc, char** argv) {
     UA_StatusCode retval = UA_Server_run(server, &running);
 
     UA_Server_delete(server);
+    pthread_join( threadUpdate, NULL );
+    printf("Thread return : %d\n", iret );
     return retval == UA_STATUSCODE_GOOD ? EXIT_SUCCESS : EXIT_FAILURE;
 }
