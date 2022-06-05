@@ -77,13 +77,12 @@ int main(int argc, char** argv) {
 
     UA_Server *server = UA_Server_new();
 	if( argc > 1) {
-        int port = 4880;
+        int port = 4840;
 		port = atoi(argv[1]);
         UA_ServerConfig_setMinimal(UA_Server_getConfig(server), port, NULL);
 	} else {
         UA_ServerConfig_setDefault(UA_Server_getConfig(server));
     }
-
     
     addCurrentTimeDataSourceVariable(server);
 
