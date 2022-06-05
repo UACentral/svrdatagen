@@ -2,15 +2,16 @@
 #include <signal.h>
 #include <stdlib.h>
 
+UA_UInt32 uiCurrentValue = 0; 
 static UA_StatusCode
-readCurrentTime(UA_Server *server,
+readCurrentValue(UA_Server *server,
                 const UA_NodeId *sessionId, void *sessionContext,
                 const UA_NodeId *nodeId, void *nodeContext,
                 UA_Boolean sourceTimeStamp, const UA_NumericRange *range,
                 UA_DataValue *dataValue) {
-    UA_DateTime now = UA_DateTime_now();
-    UA_Variant_setScalarCopy(&dataValue->value, &now,
-                             &UA_TYPES[UA_TYPES_DATETIME]);
+    UA_Variant_setScalarCopy(&dataValue->value, &uiCurrentValue,
+                             &UA_TYPES[UA_TYPES_UINT32]);
+    uiCurrentValue++;
     dataValue->hasValue = true;
     return UA_STATUSCODE_GOOD;
 }
@@ -28,17 +29,18 @@ writeCurrentTime(UA_Server *server,
 static void
 addCurrentTimeDataSourceVariable(UA_Server *server) {
     UA_VariableAttributes attr = UA_VariableAttributes_default;
-    attr.displayName = UA_LOCALIZEDTEXT("en-US", "Current time - data source");
+    attr.displayName = UA_LOCALIZEDTEXT("en-US", "uint32.1");
     attr.accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
+    attr.dataType = UA_TYPES[UA_TYPES_UINT32].typeId;
 
-    UA_NodeId currentNodeId = UA_NODEID_STRING(1, "current-time-datasource");
-    UA_QualifiedName currentName = UA_QUALIFIEDNAME(1, "current-time-datasource");
+    UA_NodeId currentNodeId = UA_NODEID_STRING(1, "uint32.1");
+    UA_QualifiedName currentName = UA_QUALIFIEDNAME(1, "uint32.1");
     UA_NodeId parentNodeId = UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER);
     UA_NodeId parentReferenceNodeId = UA_NODEID_NUMERIC(0, UA_NS0ID_ORGANIZES);
     UA_NodeId variableTypeNodeId = UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE);
 
     UA_DataSource timeDataSource;
-    timeDataSource.read = readCurrentTime;
+    timeDataSource.read = readCurrentValue;
     timeDataSource.write = writeCurrentTime;
     UA_Server_addDataSourceVariableNode(server, currentNodeId, parentNodeId,
                                         parentReferenceNodeId, currentName,
