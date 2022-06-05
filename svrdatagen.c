@@ -40,7 +40,7 @@ static void
 addCurrentTimeDataSourceVariable(UA_Server *server) {
     char nodeName[18];
     char snum[11];
-    for(int i = 1; i <= 1000; i++) {
+    for(int i = 1; i <= 100000; i++) {
         strcpy(nodeName, "uint32.");
         sprintf(snum, "%d", i);
         strcat(nodeName, snum);
