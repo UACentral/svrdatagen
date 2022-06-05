@@ -27,12 +27,12 @@ readCurrentValue(UA_Server *server,
 }
 
 static UA_StatusCode
-writeCurrentTime(UA_Server *server,
+writeCurrentValue(UA_Server *server,
                  const UA_NodeId *sessionId, void *sessionContext,
                  const UA_NodeId *nodeId, void *nodeContext,
                  const UA_NumericRange *range, const UA_DataValue *data) {
     UA_LOG_INFO(UA_Log_Stdout, UA_LOGCATEGORY_USERLAND,
-                "Changing the system time is not implemented");
+                "Changing the current value is not implemented");
     return UA_STATUSCODE_BADINTERNALERROR;
 }
 
@@ -55,13 +55,13 @@ addCurrentTimeDataSourceVariable(UA_Server *server) {
         UA_NodeId parentReferenceNodeId = UA_NODEID_NUMERIC(0, UA_NS0ID_ORGANIZES);
         UA_NodeId variableTypeNodeId = UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE);
 
-        UA_DataSource timeDataSource;
-        timeDataSource.read = readCurrentValue;
-        timeDataSource.write = writeCurrentTime;
+        UA_DataSource uint32DataSource;
+        uint32DataSource.read = readCurrentValue;
+        uint32DataSource.write = writeCurrentValue;
         UA_Server_addDataSourceVariableNode(server, currentNodeId, parentNodeId,
                                             parentReferenceNodeId, currentName,
                                             variableTypeNodeId, attr,
-                                            timeDataSource, NULL, NULL);
+                                            uint32DataSource, NULL, NULL);
     }
 }
 
