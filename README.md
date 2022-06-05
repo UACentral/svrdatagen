@@ -38,3 +38,7 @@ Build
 ```
 gcc -std=c99 open62541.c svrdatagen.c -o svrdatagen
 ```
+Build with debugging info
+```
+gcc -std=c99 -ggdb open62541.c svrdatagen.c -o svrdatagen
+```
