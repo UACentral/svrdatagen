@@ -18,9 +18,6 @@ Build
 ```
 git submodule update --init --recursive
 mkdir build && cd build
-# Componentized build, not using it for this repo
-cmake -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo -DUA_NAMESPACE_ZERO=FULL ..
-# One/amalgamated file - use this option
 cmake -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo -DUA_NAMESPACE_ZERO=FULL -DUA_ENABLE_AMALGAMATION=ON ..
 make
 sudo make install
