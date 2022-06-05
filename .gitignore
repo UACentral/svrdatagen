@@ -53,3 +53,4 @@ dkms.conf
 *.swp
 open62541.c
 open62541.h
+svrdatagen
