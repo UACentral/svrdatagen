@@ -28,13 +28,16 @@ writeCurrentTime(UA_Server *server,
 
 static void
 addCurrentTimeDataSourceVariable(UA_Server *server) {
+    char nodeName[18];
+    strcpy(nodeName, "uint32.");
+    strcat(nodeName, "1");
     UA_VariableAttributes attr = UA_VariableAttributes_default;
-    attr.displayName = UA_LOCALIZEDTEXT("en-US", "uint32.1");
+    attr.displayName = UA_LOCALIZEDTEXT("en-US", nodeName);
     attr.accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
     attr.dataType = UA_TYPES[UA_TYPES_UINT32].typeId;
 
-    UA_NodeId currentNodeId = UA_NODEID_STRING(1, "uint32.1");
-    UA_QualifiedName currentName = UA_QUALIFIEDNAME(1, "uint32.1");
+    UA_NodeId currentNodeId = UA_NODEID_STRING(1, nodeName);
+    UA_QualifiedName currentName = UA_QUALIFIEDNAME(1, nodeName);
     UA_NodeId parentNodeId = UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER);
     UA_NodeId parentReferenceNodeId = UA_NODEID_NUMERIC(0, UA_NS0ID_ORGANIZES);
     UA_NodeId variableTypeNodeId = UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE);
