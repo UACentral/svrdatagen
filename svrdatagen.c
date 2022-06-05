@@ -14,10 +14,10 @@ readCurrentValue(UA_Server *server,
 
     UA_String out = UA_STRING_NULL;
     UA_String_copy(&nodeId->identifier.string, &out);
-    printf("%.*s\n", (int)out.length, out.data);
+    // printf("%.*s\n", (int)out.length, out.data);
     int result;
     result = strcmp(out.data, "uint32.1");
-    printf("%d", result);
+    // printf("%d", result);
     if (0 == result ) {
         uiCurrentValue++;
     }
@@ -39,26 +39,30 @@ writeCurrentTime(UA_Server *server,
 static void
 addCurrentTimeDataSourceVariable(UA_Server *server) {
     char nodeName[18];
-    strcpy(nodeName, "uint32.");
-    strcat(nodeName, "1");
-    UA_VariableAttributes attr = UA_VariableAttributes_default;
-    attr.displayName = UA_LOCALIZEDTEXT("en-US", nodeName);
-    attr.accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
-    attr.dataType = UA_TYPES[UA_TYPES_UINT32].typeId;
+    char snum[11];
+    for(int i = 1; i <= 1000; i++) {
+        strcpy(nodeName, "uint32.");
+        sprintf(snum, "%d", i);
+        strcat(nodeName, snum);
+        UA_VariableAttributes attr = UA_VariableAttributes_default;
+        attr.displayName = UA_LOCALIZEDTEXT("en-US", nodeName);
+        attr.accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
+        attr.dataType = UA_TYPES[UA_TYPES_UINT32].typeId;
 
-    UA_NodeId currentNodeId = UA_NODEID_STRING(1, nodeName);
-    UA_QualifiedName currentName = UA_QUALIFIEDNAME(1, nodeName);
-    UA_NodeId parentNodeId = UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER);
-    UA_NodeId parentReferenceNodeId = UA_NODEID_NUMERIC(0, UA_NS0ID_ORGANIZES);
-    UA_NodeId variableTypeNodeId = UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE);
+        UA_NodeId currentNodeId = UA_NODEID_STRING(1, nodeName);
+        UA_QualifiedName currentName = UA_QUALIFIEDNAME(1, nodeName);
+        UA_NodeId parentNodeId = UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER);
+        UA_NodeId parentReferenceNodeId = UA_NODEID_NUMERIC(0, UA_NS0ID_ORGANIZES);
+        UA_NodeId variableTypeNodeId = UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE);
 
-    UA_DataSource timeDataSource;
-    timeDataSource.read = readCurrentValue;
-    timeDataSource.write = writeCurrentTime;
-    UA_Server_addDataSourceVariableNode(server, currentNodeId, parentNodeId,
-                                        parentReferenceNodeId, currentName,
-                                        variableTypeNodeId, attr,
-                                        timeDataSource, NULL, NULL);
+        UA_DataSource timeDataSource;
+        timeDataSource.read = readCurrentValue;
+        timeDataSource.write = writeCurrentTime;
+        UA_Server_addDataSourceVariableNode(server, currentNodeId, parentNodeId,
+                                            parentReferenceNodeId, currentName,
+                                            variableTypeNodeId, attr,
+                                            timeDataSource, NULL, NULL);
+    }
 }
 
 static volatile UA_Boolean running = true;
