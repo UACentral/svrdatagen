@@ -11,7 +11,17 @@ readCurrentValue(UA_Server *server,
                 UA_DataValue *dataValue) {
     UA_Variant_setScalarCopy(&dataValue->value, &uiCurrentValue,
                              &UA_TYPES[UA_TYPES_UINT32]);
-    uiCurrentValue++;
+
+    UA_String out = UA_STRING_NULL;
+    UA_String_copy(&nodeId->identifier.string, &out);
+    printf("%.*s\n", (int)out.length, out.data);
+    int result;
+    result = strcmp(out.data, "uint32.1");
+    printf("%d", result);
+    if (0 == result ) {
+        uiCurrentValue++;
+    }
+    UA_String_clear(&out);
     dataValue->hasValue = true;
     return UA_STATUSCODE_GOOD;
 }
