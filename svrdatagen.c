@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <pthread.h>
 
-UA_UInt32 uiCurrentValue = 0; 
+UA_UInt32 uiCurrentValue = 10; 
 static UA_StatusCode
 readCurrentValue(UA_Server *server,
                 const UA_NodeId *sessionId, void *sessionContext,
@@ -38,31 +38,56 @@ writeCurrentValue(UA_Server *server,
 }
 
 static void
-addCurrentTimeDataSourceVariable(UA_Server *server) {
+beforeRead(UA_Server *server,
+               const UA_NodeId *sessionId, void *sessionContext,
+               const UA_NodeId *nodeid, void *nodeContext,
+               const UA_NumericRange *range, const UA_DataValue *data) {
+
+    UA_UInt32 intValue = *(UA_UInt32 *)nodeContext;
+    UA_Variant value;
+    UA_Variant_setScalar(&value, &intValue, &UA_TYPES[UA_TYPES_UINT32]);
+    // size_t len = (size_t)&nodeid->identifier.string.length;
+    // char* convert = (char*)UA_malloc(sizeof(char)*(len)+1);
+    // memcpy(convert, &nodeid->identifier.string.data, len );
+    // convert[len] = '\0';
+
+    const UA_NodeId ni = UA_NODEID_STRING(1, "uint32.1" ); 
+    UA_Server_writeValue(server, ni, value);
+}
+
+static void
+addDataSourceVariable(UA_Server *server) {
     char nodeName[18];
     char snum[11];
-    for(int i = 1; i <= 100000; i++) {
+
+    for(int i = 1; i <= 10; i++) {
         strcpy(nodeName, "uint32.");
         sprintf(snum, "%d", i);
         strcat(nodeName, snum);
-        UA_VariableAttributes attr = UA_VariableAttributes_default;
-        attr.displayName = UA_LOCALIZEDTEXT("en-US", nodeName);
-        attr.accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
-        attr.dataType = UA_TYPES[UA_TYPES_UINT32].typeId;
 
-        UA_NodeId currentNodeId = UA_NODEID_STRING(1, nodeName);
-        UA_QualifiedName currentName = UA_QUALIFIEDNAME(1, nodeName);
+        UA_VariableAttributes attr = UA_VariableAttributes_default;
+        UA_Variant_setScalar(&attr.value, &uiCurrentValue, &UA_TYPES[UA_TYPES_UINT32]);
+        attr.description = UA_LOCALIZEDTEXT("en-US",nodeName);
+        attr.displayName = UA_LOCALIZEDTEXT("en-US",nodeName);
+        attr.dataType = UA_TYPES[UA_TYPES_UINT32].typeId;
+        attr.accessLevel = UA_ACCESSLEVELMASK_READ;
+        attr.value.storageType = UA_VARIANT_DATA_NODELETE;
+
+        /* Add the variable node to the information model */
+        UA_NodeId myIntegerNodeId = UA_NODEID_STRING(1, nodeName);
+        UA_QualifiedName myIntegerName = UA_QUALIFIEDNAME(1, nodeName);
         UA_NodeId parentNodeId = UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER);
         UA_NodeId parentReferenceNodeId = UA_NODEID_NUMERIC(0, UA_NS0ID_ORGANIZES);
-        UA_NodeId variableTypeNodeId = UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE);
+        UA_Server_addVariableNode(server, myIntegerNodeId, parentNodeId,
+                                parentReferenceNodeId, myIntegerName,
+                                UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), attr, NULL, NULL);
 
-        UA_DataSource uint32DataSource;
-        uint32DataSource.read = readCurrentValue;
-        uint32DataSource.write = writeCurrentValue;
-        UA_Server_addDataSourceVariableNode(server, currentNodeId, parentNodeId,
-                                            parentReferenceNodeId, currentName,
-                                            variableTypeNodeId, attr,
-                                            uint32DataSource, NULL, NULL);
+        UA_ValueCallback callback;
+        callback.onRead = beforeRead;
+        callback.onWrite = NULL;
+
+        UA_Server_setNodeContext(server, myIntegerNodeId, &uiCurrentValue);
+        UA_Server_setVariableNode_valueCallback(server, myIntegerNodeId, callback);
     }
 }
 
@@ -81,6 +106,7 @@ void *updateCurrentValue(void *arg)
         }
 
         UA_sleep_ms(1000);
+        printf("Updating: %d\n", uiCurrentValue);
     }
     printf("Exiting updateCurrentValue\n");
 }
@@ -101,7 +127,7 @@ int main(int argc, char** argv) {
         UA_ServerConfig_setDefault(UA_Server_getConfig(server));
     }
     
-    addCurrentTimeDataSourceVariable(server);
+    addDataSourceVariable(server);
 
     UA_StatusCode retval = UA_Server_run(server, &running);
 
