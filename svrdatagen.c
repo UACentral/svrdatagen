@@ -46,12 +46,12 @@ beforeRead(UA_Server *server,
     UA_UInt32 intValue = *(UA_UInt32 *)nodeContext;
     UA_Variant value;
     UA_Variant_setScalar(&value, &intValue, &UA_TYPES[UA_TYPES_UINT32]);
-    // size_t len = (size_t)&nodeid->identifier.string.length;
-    // char* convert = (char*)UA_malloc(sizeof(char)*(len)+1);
-    // memcpy(convert, &nodeid->identifier.string.data, len );
-    // convert[len] = '\0';
+    size_t len = (size_t)(*&nodeid->identifier.string.length);
+    char* convert = (char*)UA_malloc(sizeof(char)*(len)+1);
+    memcpy(convert, *&nodeid->identifier.string.data, len );
+    convert[len] = '\0';
 
-    const UA_NodeId ni = UA_NODEID_STRING(1, "uint32.1" ); 
+    const UA_NodeId ni = UA_NODEID_STRING(1, convert ); 
     UA_Server_writeValue(server, ni, value);
 }
 
