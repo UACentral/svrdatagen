@@ -52,7 +52,7 @@ beforeRead(UA_Server *server,
     convert[len] = '\0';
 
     const UA_NodeId ni = UA_NODEID_STRING(1, convert ); 
-    UA_Server_writeValue(server, ni, value);
+    UA_Server_writeValue(server, **&nodeid, value);
 }
 
 static void
