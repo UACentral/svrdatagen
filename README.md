@@ -8,14 +8,13 @@ sudo apt install build-essential
 sudo apt install git
 sudo apt install cmake
 ```
-Clone OPC UA Open62541
+Clone OPC UA Open62541 and build
 ```
 mkdir ~/prj
 cd ~/prj
 git clone https://github.com/open62541/open62541.git
-```
-Build
-```
+cd open62541
+git checkout v1.3.2
 git submodule update --init --recursive
 mkdir build && cd build
 cmake -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo -DUA_NAMESPACE_ZERO=FULL -DUA_ENABLE_AMALGAMATION=ON ..
